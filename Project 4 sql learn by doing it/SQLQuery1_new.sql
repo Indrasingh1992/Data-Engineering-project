@@ -563,8 +563,8 @@ from the left table.
 with NULL for non-matching rows.
 
 
-
-CREATE TABLE employees (
+DROP TABLE IF EXISTS employees2;
+CREATE TABLE employees2 (
     employee_id INT PRIMARY KEY,
     name VARCHAR(50),
     department_id INT,
@@ -572,14 +572,15 @@ CREATE TABLE employees (
 );
 
 -- Create departments table
+DROP TABLE IF EXISTS departments;
 CREATE TABLE departments (
     department_id INT PRIMARY KEY,
     department_name VARCHAR(50)
 );
-drop table employees
+drop table employees2
 
 -- Insert data into employees table
-INSERT INTO employees (employee_id, name, department_id, salary) VALUES
+INSERT INTO employees2 (employee_id, name, department_id, salary) VALUES
 (1, 'Alice', 1, 50000.00),
 (2, 'Bob', 2, 45000.00),
 (3, 'Charlie', 4, 48000.00),
@@ -592,24 +593,24 @@ INSERT INTO departments (department_id, department_name) VALUES
 (3, 'IT');
 
 
-select * from employees
+select * from employees2
 select * from departments
 
 
 --INNER JOIN
-select * from employees inner join departments on employees.department_id=departments.department_id
+select * from employees2 inner join departments on employees2.department_id=departments.department_id
 --left join 
-select * from employees left join departments on employees.department_id=departments.department_id
+select * from employees2 left join departments on employees2.department_id=departments.department_id
 --right join 
-select * from employees right join departments on employees.department_id=departments.department_id
+select * from employees2 right join departments on employees2.department_id=departments.department_id
 --full join 
-select * from employees full join departments on employees.department_id=departments.department_id
+select * from employees2 full join departments on employees2.department_id=departments.department_id
 
 
 
 
 ---union vs union all
-
+DROP TABLE IF EXISTS employees_2023;
 CREATE TABLE employees_2023 (
     employee_id INT,
     name VARCHAR(50),
