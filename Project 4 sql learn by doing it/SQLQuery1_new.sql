@@ -593,23 +593,24 @@ INSERT INTO departments (department_id, department_name) VALUES
 (3, 'IT');
 
 
-select * from employees2
-select * from departments
+select * from employees2;
+select * from departments;
 
 
 --INNER JOIN
-select * from employees2 inner join departments on employees2.department_id=departments.department_id
+select * from employees2 inner join departments on employees2.department_id=departments.department_id;
 --left join 
-select * from employees2 left join departments on employees2.department_id=departments.department_id
+select * from employees2 left join departments on employees2.department_id=departments.department_id;
 --right join 
-select * from employees2 right join departments on employees2.department_id=departments.department_id
+select * from employees2 right join departments on employees2.department_id=departments.department_id;
 --full join 
-select * from employees2 full join departments on employees2.department_id=departments.department_id
+select * from employees2 full join departments on employees2.department_id=departments.department_id;
 
 
 
 
 ---union vs union all
+USE EMPLOYEE;
 DROP TABLE IF EXISTS employees_2023;
 CREATE TABLE employees_2023 (
     employee_id INT,
@@ -622,6 +623,8 @@ VALUES
 (2, 'Bob', 102),
 (3, 'Charlie', 103);
 
+
+DROP TABLE IF EXISTS employees_2024;
 CREATE TABLE employees_2024 (
     employee_id INT,
     name VARCHAR(50),
@@ -662,7 +665,7 @@ SELECT * FROM employees_2023
 
 SELECT * FROM employees_2024
 
-
+-- conversion failed error as schema is different converting the varchar value 'Alice' to data type int.
 SELECT EMPLOYEE_ID,NAME FROM EMPLOYEES_2023
 UNION 
 SELECT NAME,department_id FROM employees_2024
@@ -679,7 +682,7 @@ SELECT * FROM EMPLOYEES_2023
 ALTER TABLE EMPLOYEES_2023 ADD SALARY INT 
 
 -- CHANGE THE SCHEMA OF SALARY COLUMN FROM INT TO VARCHAR 
-ALTER TABLE EMPLOYEES_2023 ALTER COLUMN SALARY INT
+ALTER TABLE EMPLOYEES_2023 ALTER COLUMN SALARY VARCHAR(128)
 
 -- DELETE COLUMN SALARY FROM THE EXISTING TABLE.
 ALTER TABLE EMPLOYEES_2023 DROP COLUMN SALARY
@@ -709,7 +712,7 @@ ALTER TABLE EMPLOYEES_2023 DROP COLUMN SALARY
 
 --TABLE 
 
-
+DROP TABLE IF EXISTS sales;
 CREATE TABLE sales (
     sales_id INT,
     salesperson VARCHAR(50),
@@ -756,15 +759,15 @@ FROM SALES
 
 --assign ranks or numbers to rows based on the order defined in the 
 --ORDER BY clause of the OVER() window function
-
-CREATE TABLE employees1 (
+DROP TABLE IF EXISTS employees3;
+CREATE TABLE employees3 (
     employee_id INT,
     name VARCHAR(50),
     department VARCHAR(50),
     salary INT
 );
 
-INSERT INTO employees1 (employee_id, name, department, salary) VALUES 
+INSERT INTO employees3 (employee_id, name, department, salary) VALUES 
 (1, 'Alice', 'Sales', 5000),
 (2, 'Bob', 'Sales', 3000),
 (3, 'Charlie', 'Sales', 3000),
@@ -772,29 +775,37 @@ INSERT INTO employees1 (employee_id, name, department, salary) VALUES
 (5, 'Eve', 'Sales', 2000);
 
 
-SELECT * FROM EMPLOYEES1
+SELECT * FROM EMPLOYEES3
 
 --ROW_NUMBER(): Unique numbering for each row; no duplicates.
 --RANK(): Same rank for ties, but gaps in ranking after ties.
 -- DENSE_RANK(): Same rank for ties, but no gaps in ranking sequence.
 
-SELECT * FROM EMPLOYEES1
+SELECT * FROM EMPLOYEES3
 
 
-SELECT *, ROW_NUMBER() OVER(ORDER BY SALARY DESC) AS RN FROM EMPLOYEES1
+SELECT *, ROW_NUMBER() OVER(ORDER BY SALARY DESC) AS RN FROM EMPLOYEES3
 
-SELECT *, DENSE_RANK() OVER(ORDER BY SALARY DESC) AS RN FROM EMPLOYEES1
+SELECT *, DENSE_RANK() OVER(ORDER BY SALARY DESC) AS RN FROM EMPLOYEES3
 
-SELECT *, RANK() OVER(ORDER BY SALARY DESC) AS RN FROM EMPLOYEES1
+SELECT *, RANK() OVER(ORDER BY SALARY DESC) AS RN FROM EMPLOYEES3
 
 
 SELECT *, ROW_NUMBER() OVER(ORDER BY SALARY DESC) AS RN,
 DENSE_RANK() OVER(ORDER BY SALARY DESC) AS RN1,
-RANK() OVER(ORDER BY SALARY DESC) AS RN3 FROM EMPLOYEES1
+RANK() OVER(ORDER BY SALARY DESC) AS RN3 FROM EMPLOYEES3
 
 -----------
 
-lead and lag
+
+
+
+
+
+
+
+--lead and lag
+DROP TABLE IF EXISTS sales1;
 
 CREATE TABLE sales1 (
     transaction_id INT,
@@ -825,10 +836,13 @@ select * from sales1
 
 
 lag
+select *,lag(amount) over(order by transaction_date ) prev_sal from sales1-- simple lag
+select *,lag(amount,2) over(order by transaction_date ) prev_sal from sales1-- simple 2 step before current row in lag
+select *,lag(amount,1,0) over(order by transaction_date ) prev_sal from sales1-- generalised lag with step and default value for null
 
-select *,lag(amount,1,0) over(order by transaction_date ) prev_sal from sales1
-
-select * ,lead(amount,1,0) over(order by transaction_date) next_Sal from sales1
+select * ,lead(amount) over(order by transaction_date) next_Sal from sales1-- simple lead
+select * ,lead(amount,1) over(order by transaction_date) next_Sal from sales1-- simple 2 step after current row in lead
+select * ,lead(amount,1,0) over(order by transaction_date) next_Sal from sales1-- generalised lead with step and default value for null
 
 
 select *,lag(amount,1,0) over(order by transaction_date ) prev_sal,
@@ -841,7 +855,6 @@ lead(amount,1,0) over(order by transaction_date) next_Sal from sales1
 
 --CTE 
 
-
 ----A Common Table Expression (CTE) in SQL is a temporary result set that you can
 --reference within a SELECT, INSERT, UPDATE, or DELETE statement.
 
@@ -852,6 +865,22 @@ lead(amount,1,0) over(order by transaction_date) next_Sal from sales1
 --especially in multi-step analyses or when calculating intermediate results.
 
 --Reusable Logic: Once defined, you can refer to a CTE multiple times within the main query.
+
+DROP TABLE IF EXISTS EMPLOYEES;
+CREATE TABLE EMPLOYEES (
+    employee_id INT,
+    name VARCHAR(50),
+    department_id INT,
+    salary DECIMAL(10, 2)
+);
+-- Insert data into employees table
+INSERT INTO EMPLOYEES (employee_id, name, department_id, salary) VALUES
+(1, 'Alice', 1, 50000.00),
+(2, 'Bob', 2, 45000.00),
+(3, 'Charlie', 4, 48000.00),
+(4, 'David', 5, 52000.00); 
+
+
 
 
 --SYNTAX 
@@ -880,6 +909,7 @@ SELECT * FROM MANISH WHERE RN=2
 
 
 ----VIEW IN SQL
+USE EMPLOYEE;
 
 A View in SQL is a virtual table created by a query.
 views do not store data physically but instead 
@@ -896,6 +926,11 @@ SELECT EMPLOYEE_ID,DEPARTMENT_ID,SALARY FROM EMPLOYEES
 SELECT * FROM EMP_INFO
 
 DROP VIEW EMP_INFO
+
+
+
+
+
 
 
 
@@ -931,6 +966,7 @@ EXEC EMP_SP
 CREATE PROCEDURE EMP_SP1 @DEPT_ID INT AS
 SELECT * FROM EMPLOYEES WHERE DEPARTMENT_ID=@DEPT_ID
 
+EXEC EMP_SP1 1
 EXEC EMP_SP1 2
 
 --Stored Procedure With Multiple Parameters
@@ -943,6 +979,10 @@ SELECT * FROM EMPLOYEES WHERE DEPARTMENT_ID=@DEPT_ID AND SALARY >@SALARY
 EXEC EMP_SP2 @DEPT_ID=1 , @SALARY=10000
 
 
+
+
+
+
 ------------------
 SUB QUERY IN SQL 
 ----------------------
@@ -953,16 +993,16 @@ SUB QUERY IN SQL
 --It allows you to use the result of one query as input in another query. 
 
 
-SELECT * FROM employee
 
-
-
+DROP TABLE IF EXISTS Departments;
 CREATE TABLE Departments (
     department_id INT PRIMARY KEY,
     department_name VARCHAR(50),
     location VARCHAR(50)
 );
 
+
+DROP TABLE IF EXISTS Employees;
 CREATE TABLE Employees (
     employee_id INT PRIMARY KEY,
     employee_name VARCHAR(50),
@@ -996,12 +1036,22 @@ SELECT AVG(SALARY) FROM EMPLOYEES
 
 SELECT * FROM EMPLOYEES WHERE SALARY > (SELECT AVG(SALARY) FROM EMPLOYEES)
 
+
+
 --QUERY2. List employees who work in departments located in 'Chicago'.
 
 
 SELECT department_id from departments where location='Chicago'
 
 select * from employees where department_id in (SELECT department_id from departments where location='Chicago')
+
+
+
+
+
+
+
+
 
 
 ---- triggers in sql
@@ -1013,7 +1063,7 @@ BEFORE Trigger: Executes before an operation (INSERT, UPDATE, or DELETE) is comp
 AFTER Trigger: Executes after an operation is completed.
 INSTEAD OF Trigger: Typically used on views to handle what happens instead of a default INSERT, UPDATE, or DELETE action.
 
-
+DROP TABLE IF EXISTS Employee;
 CREATE TABLE Employee (
     employee_id INT PRIMARY KEY,
     employee_name VARCHAR(50),
@@ -1021,7 +1071,7 @@ CREATE TABLE Employee (
     salary DECIMAL(10, 2)
 );
 
-
+DROP TABLE IF EXISTS Backup_Employee;
 CREATE TABLE Backup_Employee (
     backup_id INT IDENTITY(1,1) PRIMARY KEY,
     employee_id INT,
@@ -1070,6 +1120,120 @@ DELETE FROM Employee WHERE employee_id = 3
 
 SELECT * FROM Backup_Employee;
 
+
+
+
+
+--Data Engineer interview questions:
+
+DROP TABLE IF EXISTS Employee;
+CREATE TABLE Employee (
+    employee_id INT ,
+    employee_name VARCHAR(50),
+    department_id INT,
+    position VARCHAR(50),
+    salary DECIMAL(10, 2)
+);
+
+
+INSERT INTO Employee (employee_id, employee_name, department_id, position, salary)
+VALUES 
+(1, 'Alice Johnson', 101, 'Software Engineer', 70000),
+(2, 'Bob Smith', 102, 'Data Scientist', 80000),
+(3, 'Carol White', 103, 'Project Manager', 75000),
+(4, 'David Brown', 104, 'Quality Assurance', 60000),
+(5, 'Eva Green', 105, 'HR Specialist', 55000),
+(6, 'Frank Martin', 101, 'Software Engineer', 70000),
+(3, 'Carol White', 103, 'Project Manager', 75000),
+(4, 'David Brown', 104, 'Quality Assurance', 60000),
+(3, 'Caro White', 103, 'Project Manager', 75000)
+
+
+select * from Employee;
+-- query 1. Remove duplocate values from employee table
+
+select distinct * from employee;
+
+-- query 2. Write query to find out duplicate values from employee
+
+with cte as(
+select * , row_number() over(partition by employee_id order by employee_id) as rn from employee)
+select * from cte where rn>1
+
+
+
+-- query 3. Write query to find out highest earning employee based on each position
+select max(salary),position from employee group by position
+
+
+
+-- query 4. Write query to get top 3 highest earning employee 
+
+
+INSERT INTO Employee (employee_id, employee_name, department_id, position, salary) VALUES(3, 'Caro White', 103, 'Project Manager', 75000)
+
+delete from employee where employee_name='Caro White'
+
+select top 3 * from employee order by salary desc 
+
+
+
+
+
+WITH CTE AS (
+    SELECT DISTINCT top 3 salary FROM Employee 
+)
+Select top 3 * from Employee where salary in (SELECT * FROM CTE)order by salary desc 
+
+
+
+
+(SELECT TOP 1 * 
+ FROM Employee 
+ WHERE Salary = (SELECT TOP 1 Salary 
+                 FROM (SELECT Salary, DENSE_RANK() OVER (ORDER BY Salary DESC) AS Rank 
+                       FROM Employee) AS Ranked 
+                 WHERE Rank = 1)
+)
+
+UNION
+
+(SELECT TOP 1 * 
+ FROM Employee 
+ WHERE Salary = (SELECT TOP 1 Salary 
+                 FROM (SELECT Salary, DENSE_RANK() OVER (ORDER BY Salary DESC) AS Rank 
+                       FROM Employee) AS Ranked 
+                 WHERE Rank = 2)
+)
+
+UNION
+
+(SELECT TOP 1 * 
+ FROM Employee 
+ WHERE Salary = (SELECT TOP 1 Salary 
+                 FROM (SELECT Salary, DENSE_RANK() OVER (ORDER BY Salary DESC) AS Rank 
+                       FROM Employee) AS Ranked 
+                 WHERE Rank = 3)
+);
+
+
+
+
+
+
+
+-- query 5. Write query to get top 3 lowest earning employee 
+
+with cte as(
+select distinct * from employee)
+select top 3 * from cte order by salary asc
+
+
+select employee_id, employee_name, department_id, position, distinct(salary) from employee
+
+
+
+partiton salary order by name
 
 
 
