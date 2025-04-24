@@ -1,0 +1,11 @@
+
+
+
+Application (client) ID :    ba60258c-13dd-492a-a578-8b5cd7baa2b8
+
+Object ID  :                 51840431-0cac-4e9d-885f-e257ab6b4c2e
+
+Directory (tenant) ID  :     3ab6d4fa-f3ea-4f36-b819-3749b9eebbac
+
+
+secret_value :               tFK8Q~qugTAaVxaXVhOykzlbWPOckEOQiDgDZaxw

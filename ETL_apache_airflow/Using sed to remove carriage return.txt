@@ -1,0 +1,18 @@
+chmod +x setup2.sh
+
+sed -i 's/\r$//' setup2.sh
+
+
+
+sudo usermod -aG docker Indra
+newgrp docker
+
+
+Create Private in EC2 under RSA 
+
+under putty gen load private and save it as .pem file 
+
+#Then run this 2 commands so that User can stop the inheritance and grant only read permission to use name
+icacls "D:\Data-Engineering-project\ETL_apache_airflow\apacheairflow.pem" /inheritance:r
+icacls "D:\Data-Engineering-project\ETL_apache_airflow\apacheairflow.pem" /grant:r "Indra:R"
+

@@ -1,0 +1,6 @@
+Application (client) ID:   d65733fe-6495-4bcb-b84c-660118292f10
+Directory (tenant) ID:     3ab6d4fa-f3ea-4f36-b819-3749b9eebbac
+set:                    c1F8Q~AxmlttkwYcp.PQSetSjApc_DGuhE3Swcvj
+
+
+Databricks token for ADF:   dapicff7abcdfe0053f6ee2cdcb009e407a7  
