@@ -78,6 +78,9 @@ WHERE country = 'Germany'
    ORDER BY
 =============================================================================== */
 
+
+Use MyDatabase;
+
 /* Retrieve all customers and 
    sort the results by the highest score first. */
 SELECT *
@@ -117,6 +120,8 @@ ORDER BY score DESC
    GROUP BY
 =============================================================================== */
 
+Use MyDatabase;
+
 -- Find the total score for each country
 SELECT 
     country,
@@ -145,6 +150,8 @@ GROUP BY country
    HAVING
 =============================================================================== */
 
+Use MyDatabase;
+
 /* Find the average score for each country
    and return only those countries with an average score greater than 430 */
 SELECT
@@ -165,17 +172,29 @@ WHERE score != 0
 GROUP BY country
 HAVING AVG(score) > 430
 
+
+
+
 /* ==============================================================================
    DISTINCT
 =============================================================================== */
+
+Use MyDatabase;
+
+
 
 -- Return Unique list of all countries
 SELECT DISTINCT country
 FROM customers
 
+
+
+
 /* ==============================================================================
    TOP
 =============================================================================== */
+
+Use MyDatabase;
 
 -- Retrieve only 3 Customers
 SELECT TOP 3 *
@@ -196,9 +215,15 @@ SELECT TOP 2 *
 FROM orders
 ORDER BY order_date DESC
 
+
+
+
 /* ==============================================================================
    All Together
 =============================================================================== */
+
+
+Use MyDatabase;
 
 /* Calculate the average score for each country 
    considering only customers with a score not equal to 0
@@ -213,9 +238,12 @@ GROUP BY country
 HAVING AVG(score) > 430
 ORDER BY AVG(score) DESC
 
+
+
 /* ============================================================================== 
    COOL STUFF - Additional SQL Features
 =============================================================================== */
+Use MyDatabase;
 
 -- Execute multiple queries at once
 SELECT * FROM customers;
