@@ -18,14 +18,31 @@ use MyDatabase;
 
 /* Create a new table called persons 
    with columns: id, person_name, birth_date, and phone */
-CREATE TABLE persons (
+Use MyDatabase;
+-- check for the schema if table is already created but you are not known
+-- If the table persons already exists, this will return the schema name
+-- If it does not exist, it will return an empty result set
+
+SELECT TABLE_SCHEMA
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_NAME = 'persons';
+
+/* Create with if not exist for table */
+IF NOT EXISTS (
+    SELECT * FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_NAME = 'persons'
+      AND TABLE_SCHEMA = 'dbo'  -- optional
+)
+
+BEGIN
+   CREATE TABLE persons (
     id INT NOT NULL,
     person_name VARCHAR(50) NOT NULL,
     birth_date DATE,
     phone VARCHAR(15) NOT NULL,
     CONSTRAINT pk_persons PRIMARY KEY (id)
 )
-
+END
 /* ============================================================================== 
    ALTER
 =============================================================================== */

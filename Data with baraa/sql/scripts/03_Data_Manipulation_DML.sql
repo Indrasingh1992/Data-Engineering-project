@@ -15,6 +15,13 @@ use MyDatabase;
 /* ============================================================================== 
    INSERT
 =============================================================================== */
+use MyDatabase;
+
+/*truncate the data is alredy data is existing */
+TRUNCATE TABLE customers;
+
+/*Then Run the init-sqlserver-mydatabase.sql*/
+
 /* #1 Method: Manual INSERT using VALUES */
 -- Insert new records into the customers table
 INSERT INTO customers (id, first_name, country, score)
@@ -25,7 +32,7 @@ VALUES
 -- Incorrect column order 
 INSERT INTO customers (id, first_name, country, score)
 VALUES 
-    (8, 'Max', 'USA', NULL)
+    (8, 'USA', 'Max', NULL)
     
 -- Incorrect data type in values
 INSERT INTO customers (id, first_name, country, score)
@@ -56,25 +63,31 @@ SELECT
     'Unknown'
 FROM customers
 
+
+SELECT * FROM customers;
 /* ============================================================================== 
    UPDATE
 =============================================================================== */
+Use MyDatabase;
 
 -- Change the score of customer with ID 6 to 0
 UPDATE customers
 SET score = 0
 WHERE id = 6
+SELECT * FROM customers;
 
 -- Change the score of customer with ID 10 to 0 and update the country to 'UK'
 UPDATE customers
 SET score = 0,
     country = 'UK'
 WHERE id = 10
+SELECT * FROM customers;
 
 -- Update all customers with a NULL score by setting their score to 0
 UPDATE customers
 SET score = 0
 WHERE score IS NULL
+SELECT * FROM customers;
 
 -- Verify the update
 SELECT *
