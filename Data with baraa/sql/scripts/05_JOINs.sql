@@ -28,12 +28,19 @@ use MyDatabase;
 
 -- No Join
 /* Retrieve all data from customers and orders as separate results */
+use MyDatabase;
+
 SELECT * FROM customers;
 SELECT * FROM orders;
 
 -- INNER JOIN
 /* Get all customers along with their orders, 
    but only for customers who have placed an order */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
+
 SELECT
     c.id,
     c.first_name,
@@ -46,6 +53,10 @@ ON c.id = o.customer_id
 -- LEFT JOIN
 /* Get all customers along with their orders, 
    including those without orders */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT
     c.id,
     c.first_name,
@@ -58,6 +69,10 @@ ON c.id = o.customer_id
 -- RIGHT JOIN
 /* Get all customers along with their orders, 
    including orders without matching customers */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT
     c.id,
     c.first_name,
@@ -82,6 +97,10 @@ ON c.id = o.customer_id
 
 -- FULL JOIN
 /* Get all customers and all orders, even if there’s no match */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT
     c.id,
     c.first_name,
@@ -98,6 +117,10 @@ ON c.id = o.customer_id
 
 -- LEFT ANTI JOIN
 /* Get all customers who haven't placed any order */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT *
 FROM customers AS c
 LEFT JOIN orders AS o
@@ -106,6 +129,10 @@ WHERE o.customer_id IS NULL
 
 -- RIGHT ANTI JOIN
 /* Get all orders without matching customers */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT *
 FROM customers AS c
 RIGHT JOIN orders AS o
@@ -114,6 +141,10 @@ WHERE c.id IS NULL
 
 -- Alternative to RIGHT ANTI JOIN using LEFT JOIN
 /* Get all orders without matching customers */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT *
 FROM orders AS o 
 LEFT JOIN customers AS c
@@ -123,6 +154,10 @@ WHERE c.id IS NULL
 -- Alternative to INNER JOIN using LEFT JOIN
 /* Get all customers along with their orders, 
    but only for customers who have placed an order */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT *
 FROM customers AS c
 LEFT JOIN orders AS o
@@ -131,6 +166,12 @@ WHERE o.customer_id IS NOT NULL
 
 -- FULL ANTI JOIN
 /* Find customers without orders and orders without customers */
+
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
+
 SELECT
     c.id,
     c.first_name,
@@ -142,11 +183,18 @@ FULL JOIN orders AS o
 ON c.id = o.customer_id
 WHERE o.customer_id IS NULL OR c.id IS NULL
 
+
 -- CROSS JOIN
 /* Generate all possible combinations of customers and orders */
+use MyDatabase;
+SELECT * FROM customers;
+SELECT * FROM orders;
+
 SELECT *
 FROM customers
 CROSS JOIN orders
+
+
 
 /* ============================================================================== 
    MULTIPLE TABLE JOINS (4 Tables)
@@ -161,17 +209,24 @@ CROSS JOIN orders
    - Product price
    - Salesperson's name */
 
+
+
 USE SalesDB
+
+select * from Sales.Orders;
+select * from Sales.Customers;
+select * from Sales.Products;
+select * from Sales.Employees;   
 
 SELECT 
     o.OrderID,
     o.Sales,
     c.FirstName AS CustomerFirstName,
-    c.LastName AS CustomerLastName
-   --  p.Product AS ProductName,
-   --  p.Price,
-   --  e.FirstName AS EmployeeFirstName,
-   --  e.LastName AS EmployeeLastName
+    c.LastName AS CustomerLastName,
+    p.Product AS ProductName,
+    p.Price,
+    e.FirstName AS EmployeeFirstName,
+    e.LastName AS EmployeeLastName
 FROM Sales.Orders AS o
 LEFT JOIN Sales.Customers AS c
 ON o.CustomerID = c.CustomerID
