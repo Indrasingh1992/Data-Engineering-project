@@ -20,13 +20,15 @@ use SalesDB;
    RULES OF SET OPERATIONS
 ===============================================================================*/
 
-/* RULE: Data Types
-   The data types of columns in each query should match.
+/* RULE: Number of Columns
+   The number of columns in each query must be the same.
 */
+use SalesDB;
+
 SELECT
     FirstName,
-    LastName,
-    Country
+    LastName
+    -- Country
 FROM Sales.Customers
 UNION
 SELECT
@@ -37,6 +39,8 @@ FROM Sales.Employees;
 /* RULE: Data Types (Example)
    The data types of columns in each query should match.
 */
+use SalesDB;
+
 SELECT
     CustomerID,
     LastName
@@ -50,6 +54,8 @@ FROM Sales.Employees;
 /* RULE: Column Order
    The order of the columns in each query must be the same.
 */
+use SalesDB;
+
 SELECT
     LastName,
     CustomerID
@@ -64,6 +70,8 @@ FROM Sales.Employees;
    The column names in the result set are determined by the column names
    specified in the first SELECT statement.
 */
+use SalesDB;
+
 SELECT
     CustomerID AS ID,
     LastName AS Last_Name
@@ -77,6 +85,8 @@ FROM Sales.Employees;
 /* RULE: Correct Columns
    Ensure that the correct columns are used to maintain data consistency.
 */
+use SalesDB;
+
 SELECT
     FirstName,
     LastName
@@ -94,6 +104,10 @@ FROM Sales.Employees;
 /* TASK 1: 
    Combine the data from Employees and Customers into one table using UNION 
 */
+use SalesDB;
+
+SELECT * FROM Sales.Customers;
+SELECT * FROM Sales.Employees;
 SELECT
     FirstName,
     LastName
@@ -107,6 +121,11 @@ FROM Sales.Employees;
 /* TASK 2: 
    Combine the data from Employees and Customers into one table, including duplicates, using UNION ALL 
 */
+use SalesDB;
+
+SELECT * FROM Sales.Customers;
+SELECT * FROM Sales.Employees;
+
 SELECT
     FirstName,
     LastName
@@ -120,6 +139,11 @@ FROM Sales.Employees;
 /* TASK 3: 
    Find employees who are NOT customers using EXCEPT 
 */
+use SalesDB;
+
+SELECT * FROM Sales.Customers;
+SELECT * FROM Sales.Employees;
+
 SELECT
     FirstName,
     LastName
@@ -133,6 +157,11 @@ FROM Sales.Customers;
 /* TASK 4: 
    Find employees who are also customers using INTERSECT 
 */
+use SalesDB;
+
+SELECT * FROM Sales.Customers;
+SELECT * FROM Sales.Employees;
+
 SELECT
     FirstName,
     LastName
@@ -146,6 +175,10 @@ FROM Sales.Customers;
 /* TASK 5: 
    Combine order data from Orders and OrdersArchive into one report without duplicates 
 */
+use SalesDB;
+
+SELECT * FROM Sales.Orders;
+SELECT * FROM Sales.OrdersArchive;
 SELECT
     'Orders' AS SourceTable,
     OrderID,
