@@ -5,7 +5,7 @@ WHERE id = 8
 
 use SalesDB;
 
-/* last 6:00:00 seen video*/ 
+/* last 6:34:00 seen video*/ 
 
 
 SELECT first_name, country,
@@ -122,4 +122,41 @@ SELECT
     CreationTime,
     EOMONTH(CreationTime) AS EndOfMonth,
     cast(DATETRUNC(MONTH, creationTime) AS DATE) AS StartOfMonth
+FROM Sales.Orders;
+
+
+
+SELECT
+    OrderID,
+    CreationTime,
+    'Day ' + FORMAT(CreationTime, 'ddd MMM') + ' Q' + DATENAME(quarter, CreationTime) + ' ' + FORMAT(CreationTime, 'yyyy hh:mm:ss tt') AS CustomFormat
+FROM Sales.Orders; 
+
+
+
+select 
+FORMAT(OrderDate, 'yyyy-MM') AS OrderDate,
+COUNT(*) AS TotalOrders
+from Sales.Orders
+GROUP BY FORMAT(OrderDate, 'yyyy-MM');
+
+ 
+
+SELECT
+    FORMAT(CreationTime, 'MMM yy') AS OrderDate,
+    COUNT(*) AS TotalOrders
+FROM Sales.Orders
+GROUP BY FORMAT(CreationTime, 'MMM yy');
+
+
+
+
+
+SELECT
+    CONVERT(INT, '123') AS [String to Int CONVERT],
+    CONVERT(DATE, '2025-08-20') AS [String to Date CONVERT],
+    CreationTime,
+    CONVERT(DATE, CreationTime) AS [Datetime to Date CONVERT],
+    CONVERT(VARCHAR, CreationTime, 32) AS [USA Std. Style:32]
+    -- CONVERT(VARCHAR, CreationTime, 34) AS [EURO Std. Style:34]
 FROM Sales.Orders;

@@ -23,7 +23,7 @@
 /* ==============================================================================
    GETDATE() | DATE VALUES
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 1:
    Display OrderID, CreationTime, a hard-coded date, and the current system date.
 */
@@ -38,7 +38,7 @@ FROM Sales.Orders;
    DATE PART EXTRACTIONS
    (DATETRUNC, DATENAME, DATEPART, YEAR, MONTH, DAY)
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 2:
    Extract various parts of CreationTime using DATETRUNC, DATENAME, DATEPART,
    YEAR, MONTH, and DAY.
@@ -70,7 +70,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    DATETRUNC() DATA AGGREGATION
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 3:
    Aggregate orders by year using DATETRUNC on CreationTime.
 */
@@ -83,7 +83,7 @@ GROUP BY DATETRUNC(year, CreationTime);
 /* ==============================================================================
    EOMONTH()
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 4:
    Display OrderID, CreationTime, and the end-of-month date for CreationTime.
 */
@@ -96,7 +96,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    DATE PARTS | USE CASES
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 5:
    How many orders were placed each year?
 */
