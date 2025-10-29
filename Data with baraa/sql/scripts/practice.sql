@@ -5,7 +5,7 @@ WHERE id = 8
 
 use SalesDB;
 
-/* last 6:34:00 seen video*/ 
+/* last 08:07:00 seen video*/ 
 
 
 SELECT first_name, country,

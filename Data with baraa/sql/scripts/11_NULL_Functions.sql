@@ -20,7 +20,7 @@
 /* ==============================================================================
    HANDLE NULL - DATA AGGREGATION
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 1: 
    Find the average scores of the customers.
    Uses COALESCE to replace NULL Score with 0.
@@ -36,7 +36,7 @@ FROM Sales.Customers;
 /* ==============================================================================
    HANDLE NULL - MATHEMATICAL OPERATORS
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 2: 
    Display the full name of customers in a single field by merging their
    first and last names, and add 10 bonus points to each customer's score.
@@ -53,7 +53,7 @@ FROM Sales.Customers;
 /* ==============================================================================
    HANDLE NULL - SORTING DATA
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 3: 
    Sort the customers from lowest to highest scores,
    with NULL values appearing last.
