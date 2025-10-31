@@ -67,7 +67,7 @@ ORDER BY CASE WHEN Score IS NULL THEN 1 ELSE 0 END, Score;
 /* ==============================================================================
    NULLIF - DIVISION BY ZERO
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 4: 
    Find the sales price for each order by dividing sales by quantity.
    Uses NULLIF to avoid division by zero.
@@ -82,7 +82,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    IS NULL - IS NOT NULL
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 5: 
    Identify the customers who have no scores 
 */
@@ -100,7 +100,7 @@ WHERE Score IS NOT NULL;
 /* ==============================================================================
    LEFT ANTI JOIN
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 7: 
    List all details for customers who have not placed any orders 
 */
@@ -115,7 +115,7 @@ WHERE o.CustomerID IS NULL;
 /* ==============================================================================
    NULLs vs EMPTY STRING vs BLANK SPACES
 ===============================================================================*/
-
+use SalesDB;
 /* TASK 8: 
    Demonstrate differences between NULL, empty strings, and blank spaces 
 */

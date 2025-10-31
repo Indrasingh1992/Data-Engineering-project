@@ -160,3 +160,18 @@ SELECT
     CONVERT(VARCHAR, CreationTime, 32) AS [USA Std. Style:32]
     -- CONVERT(VARCHAR, CreationTime, 34) AS [EURO Std. Style:34]
 FROM Sales.Orders;
+
+
+WITH Orders AS (
+    SELECT 1 AS Id, 'A' AS Category UNION
+    SELECT 2, NULL UNION
+    SELECT 3, '' UNION
+    SELECT 4, '  '
+)
+SELECT 
+    *,
+    DATALENGTH(Category) AS LenCategory
+    -- TRIM(Category) AS Policy1,
+    -- NULLIF(TRIM(Category), '') AS Policy2,
+    -- COALESCE(NULLIF(TRIM(Category), ''), 'unknown') AS Policy3
+FROM Orders;
