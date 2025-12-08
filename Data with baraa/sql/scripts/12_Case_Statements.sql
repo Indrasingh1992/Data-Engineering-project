@@ -25,6 +25,7 @@
 	   - Low: Sales 20 or less
    The results are sorted from highest to lowest total sales.
 */
+Use SalesDb;
 SELECT
     Category,
     SUM(Sales) AS TotalSales
