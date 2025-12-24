@@ -39,7 +39,7 @@ FROM (
             ELSE 'Low'
         END AS Category
     FROM Sales.Orders
-) AS t
+)t
 GROUP BY Category
 ORDER BY TotalSales DESC;
 

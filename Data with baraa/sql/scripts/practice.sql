@@ -20,3 +20,28 @@ FROM (
 ) AS t
 GROUP BY Category;
 ORDER BY TotalSales DESC;
+
+use SalesDB
+
+
+SELECT
+    CustomerID,
+    LastName,
+    Score,
+    CASE
+            WHEN Score IS NULL THEN 0
+            ELSE Score
+    END ScoreClean,
+    AVG(CASE
+            WHEN Score IS NULL THEN 0
+            ELSE Score
+        END) over() as AvgCustomerClean,
+
+    AVG(Score) over() as AvgCustomer
+    from Sales.Customers
+
+
+
+    select * from customers
+
+    
