@@ -69,6 +69,7 @@ FROM Sales.Customers;
 /* TASK 3: 
    Retrieve customer details with abbreviated country codes using quick form 
 */
+Use SalesDb;
 SELECT
     CustomerID,
     FirstName,
@@ -94,6 +95,7 @@ FROM Sales.Customers;
    Calculate the average score of customers, treating NULL as 0,
    and provide CustomerID and LastName details.
 */
+Use SalesDb;
 SELECT
     CustomerID,
     LastName,

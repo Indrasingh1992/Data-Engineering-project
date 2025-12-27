@@ -19,7 +19,7 @@
 /* ============================================================================== 
    BASIC AGGREGATE FUNCTIONS
 =============================================================================== */
-
+use MyDatabase
 -- Find the total number of customers
 SELECT COUNT(*) AS total_customers
 FROM customers
@@ -45,6 +45,8 @@ FROM customers
 =============================================================================== */
 
 -- Find the number of orders, total sales, average sales, highest sales, and lowest sales per customer
+use MyDatabase
+
 SELECT
     customer_id,
     COUNT(*) AS total_orders,

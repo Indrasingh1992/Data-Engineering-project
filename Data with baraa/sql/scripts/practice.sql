@@ -1,47 +1,31 @@
-use MyDatabase;
-UPDATE customers
-SET first_name = 'USA', country = 'Max'
-WHERE id = 8
+Use SalesDB
 
-use SalesDB;
+SELECT
+    SUM(Sales) AS Total_Sales
+FROM Sales.Orders;
 
-/* last 08:07:00 seen video*/ 
 
-select Category, SUM(Sales) as TotalSales
-FROM (
-    SELECT
-        OrderID,
-        Sales,
-        CASE
-            WHEN Sales > 50 THEN 'High'
-            WHEN Sales > 20 THEN 'Medium'
-            ELSE 'Low'
-        END AS Category FROM Sales.Orders
-) AS t
-GROUP BY Category;
-ORDER BY TotalSales DESC;
-
-use SalesDB
+SELECT 
+    ProductID,
+    SUM(Sales) AS Total_Sales
+FROM Sales.Orders
+GROUP BY ProductID;
 
 
 SELECT
-    CustomerID,
-    LastName,
-    Score,
-    CASE
-            WHEN Score IS NULL THEN 0
-            ELSE Score
-    END ScoreClean,
-    AVG(CASE
-            WHEN Score IS NULL THEN 0
-            ELSE Score
-        END) over() as AvgCustomerClean,
-
-    AVG(Score) over() as AvgCustomer
-    from Sales.Customers
+    OrderID,
+    OrderDate,
+    ProductID,
+    Sales,
+    SUM(Sales) OVER () AS Total_Sales
+FROM Sales.Orders;
 
 
-
-    select * from customers
-
-    
+SELECT
+    OrderID,
+    OrderDate,
+    ProductID,
+    Sales,
+    SUM(Sales) OVER () AS Total_Sales,
+    SUM(Sales) OVER (PARTITION BY ProductID) AS Sales_By_Product
+FROM Sales.Orders;

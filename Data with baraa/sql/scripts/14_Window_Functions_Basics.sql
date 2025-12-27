@@ -25,6 +25,8 @@
 /* TASK 1: 
    Calculate the Total Sales Across All Orders 
 */
+Use SalesDB
+
 SELECT
     SUM(Sales) AS Total_Sales
 FROM Sales.Orders;
@@ -32,6 +34,8 @@ FROM Sales.Orders;
 /* TASK 2: 
    Calculate the Total Sales for Each Product 
 */
+
+
 SELECT 
     ProductID,
     SUM(Sales) AS Total_Sales
@@ -41,7 +45,7 @@ GROUP BY ProductID;
 /* ==============================================================================
    SQL WINDOW FUNCTIONS | OVER CLAUSE
 ===============================================================================*/
-
+Use SalesDB
 /* TASK 3: 
    Find the total sales across all orders,
    additionally providing details such as OrderID and OrderDate 
@@ -57,7 +61,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    SQL WINDOW FUNCTIONS | PARTITION CLAUSE
 ===============================================================================*/
-
+Use SalesDB
 /* TASK 4: 
    Find the total sales across all orders and for each product,
    additionally providing details such as OrderID and OrderDate 
@@ -90,7 +94,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    SQL WINDOW FUNCTIONS | ORDER CLAUSE
 ===============================================================================*/
-
+Use SalesDB
 /* TASK 6: 
    Rank each order by Sales from highest to lowest */
 SELECT
@@ -103,7 +107,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    SQL WINDOW FUNCTIONS | FRAME CLAUSE
 ===============================================================================*/
-
+Use SalesDB
 /* TASK 7: 
    Calculate Total Sales by Order Status for current and next two orders 
 */
@@ -187,7 +191,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    SQL WINDOW FUNCTIONS | RULES
 ===============================================================================*/
-
+Use SalesDB
 /* RULE 1: 
    Window functions can only be used in SELECT or ORDER BY clauses 
 */
@@ -216,7 +220,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    SQL WINDOW FUNCTIONS | GROUP BY
 ===============================================================================*/
-
+Use SalesDB
 /* TASK 12: 
    Rank customers by their total sales 
 */
