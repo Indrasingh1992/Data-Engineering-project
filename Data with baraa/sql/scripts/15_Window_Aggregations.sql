@@ -18,10 +18,12 @@
 /* ============================================================
    SQL WINDOW AGGREGATION | COUNT
    ============================================================ */
+use SalesDB
 
 /* TASK 1:
    Find the Total Number of Orders and the Total Number of Orders for Each Customer
 */
+
 SELECT
     OrderID,
     OrderDate,
@@ -59,7 +61,7 @@ WHERE CheckDuplicates > 1
 /* ============================================================
    SQL WINDOW AGGREGATION | SUM
    ============================================================ */
-
+use SalesDB
 /* TASK 4:
    - Find the Total Sales Across All Orders 
    - Find the Total Sales for Each Product
