@@ -54,7 +54,7 @@ SELECT
     Dense_rank() OVER (ORDER BY Sales ASC) AS Rank_Sales
 FROM Sales.Orders;
 
-
+Use SalesDB
 SELECT
     OrderID,
     OrderDate,
@@ -80,6 +80,6 @@ SELECT
     SUM(Sales) OVER (
         PARTITION BY OrderStatus 
         ORDER BY OrderDate 
-        ROWS unbounded FOLLOWING
+        ROWS 1 FOLLOWING
     ) AS Total_Sales
 FROM Sales.Orders;
