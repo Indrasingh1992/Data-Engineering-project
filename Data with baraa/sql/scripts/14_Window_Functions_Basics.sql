@@ -230,3 +230,6 @@ SELECT
     RANK() OVER (ORDER BY SUM(Sales) DESC) AS Rank_Customers
 FROM Sales.Orders
 GROUP BY CustomerID;
+
+
+-- video till  9hrs 40 mins

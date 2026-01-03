@@ -14,7 +14,7 @@
     5. ROLLING SUM & AVERAGE Use Case
 ===============================================================================
 */
-
+-- video start at 9hr 47 MIN
 /* ============================================================
    SQL WINDOW AGGREGATION | COUNT
    ============================================================ */
@@ -89,7 +89,7 @@ FROM Sales.Orders
 /* ============================================================
    SQL WINDOW AGGREGATION | AVG
    ============================================================ */
-
+use SalesDB
 /* TASK 6:
    - Find the Average Sales Across All Orders 
    - Find the Average Sales for Each Product
@@ -133,7 +133,7 @@ WHERE Sales > Avg_Sales
 /* ============================================================
    SQL WINDOW AGGREGATION | MAX / MIN
    ============================================================ */
-
+use SalesDB
 /* TASK 9:
    Find the Highest and Lowest Sales across all orders
 */
@@ -182,7 +182,7 @@ FROM Sales.Orders
 /* ============================================================
    Use Case | ROLLING SUM & AVERAGE
    ============================================================ */
-
+uSE SalesDB
 /* TASK 13:
    Calculate the moving average of Sales for each Product over time
 */
