@@ -226,9 +226,6 @@ FROM Sales.Orders
 -- 123
 
 -- 789
-<<<<<<< Updated upstream
 -- 459
-=======
 
 -- 10 11 13
->>>>>>> Stashed changes
