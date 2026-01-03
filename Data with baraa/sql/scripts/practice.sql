@@ -222,9 +222,5 @@ FROM Sales.Orders
 
 
 --  10 hrs 48 min 41 sec
-<<<<<<< Updated upstream
 
 -- 123
-=======
--- 456
->>>>>>> Stashed changes
