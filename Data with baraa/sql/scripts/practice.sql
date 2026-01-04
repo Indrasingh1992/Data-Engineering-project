@@ -221,12 +221,43 @@ SELECT
 FROM Sales.Orders
 
 
---  10 hrs 48 min 41 sec
+--  10 hrs 52 min 41 sec
+use SalesDB
 
--- 123
+SELECT
+    OrderID,
+    ProductID,
+    Sales,
+    ROW_NUMBER() OVER (ORDER BY Sales DESC) AS SalesRank_Row,
+    RANK() OVER (ORDER BY Sales DESC) AS SalesRank_Rank,
+    DENSE_RANK() OVER (ORDER BY Sales DESC) AS SalesRank_Dense
+FROM Sales.Orders;
 
--- 789
 
--- 459
 
--- 10 11 13
+select * from (
+SELECT
+        OrderID,
+        ProductID,
+        Sales,
+        ROW_NUMBER() OVER (PARTITION BY ProductID ORDER BY Sales DESC) AS RankByProduct
+    FROM Sales.Orders)t 
+    where RankByProduct=1
+
+
+
+SELECT
+        CustomerID,
+        SUM(Sales) AS TotalSales,
+        ROW_NUMBER() OVER (ORDER BY SUM(Sales)) AS RankCustomers
+    FROM Sales.Orders
+    GROUP BY CustomerID
+
+
+select CustomerID,
+       sum(sales) Total_sales
+    From sales.orders
+    group by CustomerID
+
+
+-- 11hr 17 MIN

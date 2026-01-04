@@ -18,7 +18,7 @@
 /* ============================================================
    SQL WINDOW RANKING | ROW_NUMBER, RANK, DENSE_RANK
    ============================================================ */
-
+use SalesDB
 /* TASK 1:
    Rank Orders Based on Sales from Highest to Lowest
 */
