@@ -35,7 +35,7 @@ GO
 -- Check if the schema 'Sales' exists
 IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'Sales')
 BEGIN
-    -- If it does exist, drop the 'Sales' schema
+    -- If it does exist, drop the 'Sales' schema.
     DROP SCHEMA Sales;
 END;
 GO

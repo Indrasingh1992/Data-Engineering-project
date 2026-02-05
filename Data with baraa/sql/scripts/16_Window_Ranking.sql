@@ -83,7 +83,7 @@ WHERE rn = 1;
 /* ============================================================
    SQL WINDOW RANKING | NTILE
    ============================================================ */
-
+use SalesDB
 /* TASK 6:
    Divide Orders into Groups Based on Sales
 */
@@ -95,7 +95,7 @@ SELECT
     NTILE(3) OVER (ORDER BY Sales) AS ThreeBuckets,
     NTILE(4) OVER (ORDER BY Sales) AS FourBuckets,
     NTILE(2) OVER (PARTITION BY ProductID ORDER BY Sales) AS TwoBucketByProducts
-FROM Sales.Orders;
+FROM Sales.Orders order by Sales;
 
 /* TASK 7:
    Segment all Orders into 3 Categories: High, Medium, and Low Sales.
@@ -128,7 +128,7 @@ FROM Sales.Orders;
 /* ============================================================
    SQL WINDOW RANKING | CUME_DIST
    ============================================================ */
-
+use SalesDB
 /* TASK 9:
    Find Products that Fall Within the Highest 40% of the Prices
 */
