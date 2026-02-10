@@ -145,3 +145,17 @@ FROM (
     FROM Sales.Products
 ) AS PriceDistribution
 WHERE DistRank <= 0.4;
+
+SELECT 
+    Product,
+    Price,
+    DistRank,
+    CONCAT(DistRank * 100, '%') AS DistRankPerc
+FROM (
+    SELECT
+        Product,
+        Price,
+        PERCENT_RANK() OVER (ORDER BY Price DESC) AS DistRank
+    FROM Sales.Products
+) AS PriceDistribution
+WHERE DistRank <= 0.4;

@@ -16,10 +16,11 @@
 /* ============================================================
    SQL WINDOW VALUE | LEAD, LAG
    ============================================================ */
-
+use SalesDB
 /* TASK 1:
    Analyze the Month-over-Month Performance by Finding the Percentage Change in Sales
    Between the Current and Previous Months
+   Time Series Analysis 
 */
 
 SELECT
@@ -64,7 +65,7 @@ GROUP BY CustomerID;
 /* ============================================================
    SQL WINDOW VALUE | FIRST & LAST VALUE
    ============================================================ */
-
+use SalesDB
 /* TASK 3:
    Find the Lowest and Highest Sales for Each Product,
    and determine the difference between the current Sales and the lowest Sales for each Product.
