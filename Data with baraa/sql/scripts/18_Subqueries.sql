@@ -21,7 +21,7 @@
 /* ==============================================================================
    SUBQUERY | RESULT TYPES
 ===============================================================================*/
-
+use SalesDB
 /* Scalar Query */
 SELECT
     AVG(Sales)
@@ -41,7 +41,7 @@ FROM Sales.Orders;
 /* ==============================================================================
    SUBQUERY | FROM CLAUSE
 ===============================================================================*/
-
+use SalesDB
 /* TASK 1:
    Find the products that have a price higher than the average price of all products.
 */
@@ -78,7 +78,7 @@ FROM (
 /* ==============================================================================
    SUBQUERY | SELECT
 ===============================================================================*/
-
+use SalesDB
 /* TASK 3:
    Show the product IDs, product names, prices, and the total number of orders.
 */
@@ -93,7 +93,7 @@ FROM Sales.Products;
 /* ==============================================================================
    SUBQUERY | JOIN CLAUSE
 ===============================================================================*/
-
+use SalesDB
 /* TASK 4:
    Show customer details along with their total sales.
 */
@@ -133,7 +133,7 @@ LEFT JOIN (
 /* ==============================================================================
    SUBQUERY | COMPARISON OPERATORS
 ===============================================================================*/
-
+use SalesDB
 /* TASK 6:
    Find the products that have a price higher than the average price of all products.
 */
@@ -148,7 +148,7 @@ WHERE Price > (SELECT AVG(Price) FROM Sales.Products); -- Subquery
 /* ==============================================================================
    SUBQUERY | IN OPERATOR
 ===============================================================================*/
-
+use SalesDB
 /* TASK 7:
    Show the details of orders made by customers in Germany.
 */
@@ -182,7 +182,7 @@ WHERE CustomerID NOT IN (
 /* ==============================================================================
    SUBQUERY | ANY OPERATOR
 ===============================================================================*/
-
+use SalesDB
 /* TASK 9:
    Find female employees whose salaries are greater than the salaries of any male employees.
 */
@@ -201,7 +201,7 @@ WHERE Gender = 'F'
 /* ==============================================================================
    CORRELATED SUBQUERY
 ===============================================================================*/
-
+use SalesDB
 /* TASK 10:
    Show all customer details and the total orders for each customer using a correlated subquery.
 */
@@ -216,7 +216,7 @@ FROM Sales.Customers AS c;
 /* ==============================================================================
    SUBQUERY | EXISTS OPERATOR
 ===============================================================================*/
-
+use SalesDB
 /* TASK 11:
    Show the details of orders made by customers in Germany.
 */
