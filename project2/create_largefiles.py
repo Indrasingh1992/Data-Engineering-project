@@ -71,3 +71,13 @@ if __name__ == "__main__":
     os.rmdir(TEMP_FOLDER)
 
     print(f"CSV generation completed: {OUTPUT_FILE}")
+
+
+# write a function get the even number
+def get_even_numbers(numbers):
+    even_numbers = [num for num in numbers if num % 2 == 0]
+    return even_numbers
+
+
+
+
