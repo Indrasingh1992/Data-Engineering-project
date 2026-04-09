@@ -146,8 +146,17 @@ LEFT JOIN CustomerOrders CO ON c.CustomerID = CO.customerID;
 
 
 
- -- start  13:31:37 for advance sql Subqueries sql
 use SalesDB
 -- write sql query to get the product list with price less than 20
 SELECT Product, Price FROM Sales.Products WHERE Price < 20
 
+ -- start  13:31:37 for advance sql Subqueries sql
+
+
+SELECT *,
+RANK() OVER (ORDER BY TotalSales DESC) AS Customerrank
+ from (
+SELECT
+        CustomerID,
+        SUM(Sales) AS TotalSales
+    FROM Sales.Orders GROUP BY CustomerID) AS t
