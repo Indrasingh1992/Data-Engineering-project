@@ -1,0 +1,1419 @@
+================================================================================
+       SALES DATA ANALYSIS NOTEBOOK — LINE BY LINE EXPLANATION
+================================================================================
+
+
+================================================================================
+CELL 1 — LOAD DATA
+================================================================================
+
+CODE:
+    import pandas as pd
+
+EXPLANATION:
+    Imports the pandas library and gives it the alias 'pd'.
+    Pandas is used for all data loading, manipulation, and analysis operations.
+
+OUTPUT:
+    No visible output. Library is loaded into memory.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df = pd.read_csv('sales_data_sample.csv', encoding='latin1')
+
+EXPLANATION:
+    Reads the CSV file from disk into a DataFrame called 'df'.
+    encoding='latin1' handles special characters like accented letters (é, ü, ñ)
+    that would cause an error with the default UTF-8 encoding.
+
+OUTPUT:
+    No visible output. 2823 rows × 25 columns loaded into df.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df.head(10)
+
+EXPLANATION:
+    Displays the first 10 rows of the DataFrame as a formatted table.
+    Used to quickly verify the data loaded correctly.
+
+OUTPUT:
+    A 10-row × 25-column table showing columns:
+    ORDERNUMBER, QUANTITYORDERED, PRICEEACH, ORDERLINENUMBER, SALES,
+    ORDERDATE, STATUS, QTR_ID, MONTH_ID, YEAR_ID, PRODUCTLINE, MSRP,
+    PRODUCTCODE, CUSTOMERNAME, PHONE, ADDRESSLINE1, ADDRESSLINE2,
+    CITY, STATE, POSTALCODE, COUNTRY, TERRITORY, CONTACTLASTNAME,
+    CONTACTFIRSTNAME, DEALSIZE
+
+
+================================================================================
+DISCREPANCY ANALYSIS SECTION
+================================================================================
+
+
+--------------------------------------------------------------------------------
+CELL e32b00b9 — DATASET OVERVIEW
+--------------------------------------------------------------------------------
+
+CODE:
+    print(f"Shape: {df.shape}")
+
+EXPLANATION:
+    df.shape returns a tuple (rows, columns).
+    Printed using an f-string to show total size of the dataset.
+
+OUTPUT:
+    Shape: (2823, 25)
+    Meaning: 2,823 rows and 25 columns in the dataset.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    print(f"\nColumn dtypes:\n{df.dtypes}")
+
+EXPLANATION:
+    df.dtypes returns the data type of each column.
+    Helps identify columns stored in wrong types
+    (e.g., a date stored as string instead of datetime).
+
+OUTPUT:
+    ORDERNUMBER         int64
+    QUANTITYORDERED     int64
+    PRICEEACH           float64
+    ORDERLINENUMBER     int64
+    SALES               float64
+    ORDERDATE           str
+    STATUS              str
+    QTR_ID              int64
+    MONTH_ID            int64
+    YEAR_ID             int64
+    PRODUCTLINE         str
+    MSRP                int64
+    PRODUCTCODE         str
+    CUSTOMERNAME        str
+    PHONE               str
+    ADDRESSLINE1        str
+    ADDRESSLINE2        str
+    CITY                str
+    STATE               str
+    POSTALCODE          str
+    COUNTRY             str
+    TERRITORY           str
+    CONTACTLASTNAME     str
+    CONTACTFIRSTNAME    str
+    DEALSIZE            str
+
+--------------------------------------------------------------------------------
+
+CODE:
+    print(f"\nTotal nulls per column:\n{df.isnull().sum()}")
+
+EXPLANATION:
+    df.isnull() returns a True/False DataFrame — True wherever a value is missing.
+    .sum() counts all Trues per column, giving the total null count per column.
+
+OUTPUT:
+    ORDERNUMBER            0
+    QUANTITYORDERED        0
+    PRICEEACH              0
+    ORDERLINENUMBER        0
+    SALES                  0
+    ORDERDATE              0
+    STATUS                 0
+    QTR_ID                 0
+    MONTH_ID               0
+    YEAR_ID                0
+    PRODUCTLINE            0
+    MSRP                   0
+    PRODUCTCODE            0
+    CUSTOMERNAME           0
+    PHONE                  0
+    ADDRESSLINE1           0
+    ADDRESSLINE2        2521
+    CITY                   0
+    STATE               1486
+    POSTALCODE             76
+    COUNTRY                0
+    TERRITORY           1074
+    CONTACTLASTNAME        0
+    CONTACTFIRSTNAME       0
+    DEALSIZE               0
+
+
+--------------------------------------------------------------------------------
+CELL ba22c823 — SALES vs QUANTITYORDERED * PRICEEACH MISMATCH
+--------------------------------------------------------------------------------
+
+CODE:
+    df['EXPECTED_SALES'] = (df['QUANTITYORDERED'] * df['PRICEEACH']).round(2)
+
+EXPLANATION:
+    Multiplies QUANTITYORDERED and PRICEEACH for every row to calculate
+    what SALES should mathematically be.
+    .round(2) rounds to 2 decimal places to match currency precision.
+    Result stored as a new column called EXPECTED_SALES.
+
+OUTPUT:
+    New column EXPECTED_SALES added to df. No printed output.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df['SALES_DIFF'] = (df['SALES'] - df['EXPECTED_SALES']).round(2)
+
+EXPLANATION:
+    Subtracts EXPECTED_SALES from actual SALES to find the discrepancy.
+    Positive value = SALES is inflated.
+    Negative value = SALES is understated.
+    Stored as a new column SALES_DIFF.
+
+OUTPUT:
+    New column SALES_DIFF added to df. No printed output.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    sales_mismatch = df[df['SALES_DIFF'].abs() > 0.05][
+        ['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED',
+         'PRICEEACH','EXPECTED_SALES','SALES','SALES_DIFF']
+    ]
+
+EXPLANATION:
+    df['SALES_DIFF'].abs() takes the absolute value of each diff (ignores sign).
+    > 0.05 filters rows where the discrepancy is greater than 5 cents
+    (to avoid false positives from floating-point rounding).
+    The [...] selects only the relevant columns for display.
+
+OUTPUT:
+    A filtered DataFrame showing 1,304 mismatched rows.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    sales_mismatch.sort_values('SALES_DIFF', key=abs, ascending=False)
+
+EXPLANATION:
+    Sorts the mismatch results by magnitude of discrepancy (largest first).
+    key=abs sorts by absolute value so both large positive and large
+    negative differences appear at the top.
+
+OUTPUT:
+    Top result: ORDER 10322 — SALES=$12,536.50 but QTY×PRICE=$5,000.00
+    SALES_DIFF = $7,536.50 (inflated)
+    Total mismatch rows: 1,304
+
+
+--------------------------------------------------------------------------------
+CELL 876c587d — PRICEEACH EXCEEDS MSRP
+--------------------------------------------------------------------------------
+
+CODE:
+    price_above_msrp = df[df['PRICEEACH'] > df['MSRP']][
+        ['ORDERNUMBER','PRODUCTCODE','MSRP','PRICEEACH']
+    ]
+
+EXPLANATION:
+    df['PRICEEACH'] > df['MSRP'] compares two columns row by row.
+    Returns True where the selling price exceeds the manufacturer
+    suggested retail price — a logical impossibility in normal business.
+    Filters and shows only the 4 relevant columns.
+
+OUTPUT:
+    843 rows where PRICEEACH > MSRP.
+    Example: ORDERNUMBER=10107, PRODUCTCODE=S10_1678, MSRP=95, PRICEEACH=95.70
+    Selling above the recommended retail price.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    print(f"Rows where PRICEEACH > MSRP: {len(price_above_msrp)}")
+
+EXPLANATION:
+    len() counts the rows in the filtered DataFrame.
+    Prints the total count of invalid pricing records.
+
+OUTPUT:
+    Rows where PRICEEACH > MSRP: 843
+
+
+--------------------------------------------------------------------------------
+CELL a59a1d8e — DATE DIMENSION VALIDATION
+--------------------------------------------------------------------------------
+
+CODE:
+    df['ORDERDATE'] = pd.to_datetime(df['ORDERDATE'])
+
+EXPLANATION:
+    Converts the ORDERDATE column from a plain string ("2/24/2003 0:00")
+    to a pandas datetime object. This enables date arithmetic and
+    extraction of month, quarter, year parts.
+
+OUTPUT:
+    ORDERDATE column type changes from str to datetime64. No printed output.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df['DERIVED_MONTH']  = df['ORDERDATE'].dt.month
+    df['DERIVED_QTR']    = df['ORDERDATE'].dt.quarter
+    df['DERIVED_YEAR']   = df['ORDERDATE'].dt.year
+
+EXPLANATION:
+    .dt is the datetime accessor for pandas Series.
+    .month extracts the month number (1=Jan, 12=Dec).
+    .quarter extracts the quarter (1=Q1, 4=Q4).
+    .year extracts the 4-digit year.
+    These become the "ground truth" values to compare against stored IDs.
+
+OUTPUT:
+    Three new columns added. No printed output.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    month_mismatch = df[df['MONTH_ID'] != df['DERIVED_MONTH']][...]
+    qtr_mismatch   = df[df['QTR_ID']   != df['DERIVED_QTR']]  [...]
+    year_mismatch  = df[df['YEAR_ID']  != df['DERIVED_YEAR']] [...]
+
+EXPLANATION:
+    != compares stored IDs with derived values row by row.
+    Filters rows where they do not match — these are date dimension errors.
+
+OUTPUT:
+    All three are empty DataFrames — 0 mismatches found.
+    The stored MONTH_ID, QTR_ID, YEAR_ID are all accurate.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    display(month_mismatch, qtr_mismatch, year_mismatch)
+
+EXPLANATION:
+    display() renders each DataFrame as a formatted table in Jupyter.
+    Shows all three results consecutively.
+
+OUTPUT:
+    MONTH_ID mismatches : 0
+    QTR_ID mismatches   : 0
+    YEAR_ID mismatches  : 0
+    All three tables are empty.
+
+
+--------------------------------------------------------------------------------
+CELL acc3a1dc — MISSING VALUES SUMMARY
+--------------------------------------------------------------------------------
+
+CODE:
+    missing = df.isnull().sum()
+    missing = missing[missing > 0].sort_values(ascending=False)
+
+EXPLANATION:
+    First line: counts nulls per column (same as overview cell).
+    Second line: filters to only columns that have at least 1 null,
+    then sorts from most missing to least.
+
+OUTPUT:
+    4 columns with missing values identified.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    for col, cnt in missing.items():
+        pct = cnt / len(df) * 100
+        print(f"  {col:<20} {cnt:>4} rows  ({pct:.1f}%)")
+
+EXPLANATION:
+    .items() iterates over (column_name, null_count) pairs.
+    pct calculates what percentage of total rows are null for that column.
+    f-string formatting:
+      {col:<20} = left-align column name in 20 character space
+      {cnt:>4}  = right-align count in 4 character space
+      {pct:.1f} = percentage with 1 decimal place
+
+OUTPUT:
+    ADDRESSLINE2         2521 rows  (89.3%)
+    STATE                1486 rows  (52.6%)
+    TERRITORY            1074 rows  (38.0%)
+    POSTALCODE             76 rows  ( 2.7%)
+
+
+--------------------------------------------------------------------------------
+CELL 132bee55 — TERRITORY INCONSISTENCY
+--------------------------------------------------------------------------------
+
+CODE:
+    country_territory = df.groupby(['COUNTRY','TERRITORY']).size().reset_index(name='COUNT')
+
+EXPLANATION:
+    .groupby(['COUNTRY','TERRITORY']) groups rows sharing the same
+    country AND territory combination.
+    .size() counts how many rows are in each group.
+    .reset_index(name='COUNT') converts the result back to a flat
+    DataFrame with a column named COUNT.
+
+OUTPUT:
+    A table of all country+territory combinations with their counts.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    multi_territory = country_territory.groupby('COUNTRY').filter(lambda x: len(x) > 1)
+
+EXPLANATION:
+    Groups by COUNTRY only this time.
+    .filter() keeps entire groups (countries) where len(x) > 1 —
+    meaning the country appears with more than one territory value.
+    lambda x: len(x) > 1 is an anonymous function applied to each group.
+
+OUTPUT:
+    Countries mapped to more than one TERRITORY:
+    COUNTRY    TERRITORY   COUNT
+    Singapore  APAC          36
+    Singapore  Japan         43
+    Singapore appears with both APAC and Japan — a data error.
+
+
+--------------------------------------------------------------------------------
+CELL 72b670a1 — DUPLICATE CHECK
+--------------------------------------------------------------------------------
+
+CODE:
+    dupes = df.duplicated()
+    print(f"Fully duplicate rows: {dupes.sum()}")
+
+EXPLANATION:
+    .duplicated() returns a True/False Series — True for rows that are
+    exact copies of a previous row (all 25 columns match).
+    .sum() counts the Trues.
+
+OUTPUT:
+    Fully duplicate rows: 0
+    No fully duplicate records exist.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    key_dupes = df.duplicated(subset=['ORDERNUMBER','ORDERLINENUMBER'], keep=False)
+
+EXPLANATION:
+    subset= checks only these two columns for duplicates.
+    keep=False marks ALL copies as True (not just the 2nd occurrence).
+    ORDERNUMBER + ORDERLINENUMBER should uniquely identify each line item.
+
+OUTPUT:
+    Duplicate ORDERNUMBER+ORDERLINENUMBER pairs: 0
+    Empty DataFrame — no key-level duplicates.
+
+
+--------------------------------------------------------------------------------
+CELL de81873b — OUTLIER DETECTION (IQR METHOD)
+--------------------------------------------------------------------------------
+
+CODE:
+    Q1, Q3 = df[col].quantile(0.25), df[col].quantile(0.75)
+    IQR = Q3 - Q1
+
+EXPLANATION:
+    .quantile(0.25) = 25th percentile (Q1) — bottom quarter cutoff.
+    .quantile(0.75) = 75th percentile (Q3) — top quarter cutoff.
+    IQR (Interquartile Range) = the spread of the middle 50% of data.
+    This is the standard Tukey method for outlier detection.
+
+OUTPUT:
+    Computed internally per column. No direct print here.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    outliers = df[(df[col] < Q1 - 1.5*IQR) | (df[col] > Q3 + 1.5*IQR)]
+
+EXPLANATION:
+    Standard Tukey fence formula:
+      Lower fence = Q1 - 1.5 × IQR
+      Upper fence = Q3 + 1.5 × IQR
+    Any value outside these fences is an outlier.
+    | is the OR operator — flags values below lower OR above upper fence.
+
+OUTPUT:
+    QUANTITYORDERED:  8 outliers  (Q1=27.00, Q3=43.00, IQR=16.00)
+    SALES:           81 outliers  (Q1=$2203.43, Q3=$4508.00, IQR=$2304.57)
+    PRICEEACH:        0 outliers  (Q1=$68.86, Q3=$100.00, IQR=$31.14)
+
+
+--------------------------------------------------------------------------------
+CELL 90f6e8d0 — SUMMARY REPORT
+--------------------------------------------------------------------------------
+
+CODE:
+    checks = { "Total records": len(df), "SALES != QTY * PRICE rows": len(sales_mismatch), ... }
+
+EXPLANATION:
+    A Python dictionary mapping each check name to its result count.
+    Consolidates all findings from previous cells into one structure.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    for k, v in checks.items():
+        flag = " <-- ISSUE" if (v > 0 and k != "Total records") else ""
+        print(f"  {k:<40} {v:>6}{flag}")
+
+EXPLANATION:
+    Loops through each check.
+    flag = " <-- ISSUE" is appended if the count > 0 (except for
+    Total records which is always > 0 and not an issue).
+    Formatted print: 40-char left-aligned label, 6-char right-aligned count.
+
+OUTPUT:
+    =======================================================
+             DATA DISCREPANCY SUMMARY REPORT
+    =======================================================
+      Total records                              2823
+      SALES != QTY * PRICE rows                 1304 <-- ISSUE
+      PRICEEACH > MSRP rows                      843 <-- ISSUE
+      MONTH_ID mismatches                          0
+      QTR_ID mismatches                            0
+      YEAR_ID mismatches                           0
+      Countries w/ multiple TERRITORY              1 <-- ISSUE
+      Fully duplicate rows                         0
+      Duplicate ORDER+LINE key pairs               0
+      Missing POSTALCODE                          76 <-- ISSUE
+      Missing STATE                             1486 <-- ISSUE
+      Missing TERRITORY                         1074 <-- ISSUE
+      Missing ADDRESSLINE2                      2521 <-- ISSUE
+
+
+================================================================================
+DATA CLEANING SECTION
+================================================================================
+
+
+--------------------------------------------------------------------------------
+CELL 66a8b1f5 — CLEAN COPY
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean = df.copy()
+
+EXPLANATION:
+    Creates a completely independent copy of df.
+    Without .copy(), changes to df_clean would also affect df.
+    This preserves the original data for reference.
+
+OUTPUT:
+    No printed output. df_clean now exists as a separate object.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean.drop(columns=['EXPECTED_SALES','SALES_DIFF','DERIVED_MONTH',
+                            'DERIVED_QTR','DERIVED_YEAR'], inplace=True)
+
+EXPLANATION:
+    Removes the helper columns we added during analysis.
+    These were temporary calculation columns, not part of the original data.
+    inplace=True modifies df_clean directly without needing reassignment.
+
+OUTPUT:
+    Starting shape: (2823, 25)
+    Back to the original 25 columns.
+
+
+--------------------------------------------------------------------------------
+CELL d995c6c4 — FIX SALES VALUES
+--------------------------------------------------------------------------------
+
+CODE:
+    expected = (df_clean['QUANTITYORDERED'] * df_clean['PRICEEACH']).round(2)
+
+EXPLANATION:
+    Recalculates the correct SALES value for every row.
+    QTY × PRICE = expected revenue per line item, rounded to 2 decimal places.
+
+OUTPUT:
+    No printed output. 'expected' is a Series of correct sales values.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    mismatch_mask = (df_clean['SALES'] - expected).abs() > 0.05
+
+EXPLANATION:
+    Subtracts expected from actual SALES, takes absolute value.
+    Creates a boolean mask (True/False per row).
+    True = this row has a sales discrepancy greater than $0.05.
+
+OUTPUT:
+    No printed output. 'mismatch_mask' is a boolean Series.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean.loc[mismatch_mask, 'SALES'] = expected[mismatch_mask]
+
+EXPLANATION:
+    .loc[row_mask, column] targets specific rows and column simultaneously.
+    Only rows where mismatch_mask is True get updated.
+    Sets SALES = the correct expected value for those rows only.
+    Rows with correct SALES are left unchanged.
+
+OUTPUT:
+    Fix 2 — Recalculated SALES for 1304 rows
+
+
+--------------------------------------------------------------------------------
+CELL 04a3d6f1 — CAP PRICEEACH AT MSRP
+--------------------------------------------------------------------------------
+
+CODE:
+    over_msrp_mask = df_clean['PRICEEACH'] > df_clean['MSRP']
+
+EXPLANATION:
+    Row-by-row comparison: True wherever selling price exceeds MSRP.
+    This is the boolean mask identifying rows needing correction.
+
+OUTPUT:
+    No printed output. 843 rows will be True in this mask.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean.loc[over_msrp_mask, 'PRICEEACH'] = df_clean.loc[over_msrp_mask, 'MSRP']
+
+EXPLANATION:
+    For rows where price > MSRP, overwrite PRICEEACH with the MSRP value.
+    This caps the selling price at the maximum allowed retail price.
+
+OUTPUT:
+    No printed output. 843 PRICEEACH values updated.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean.loc[over_msrp_mask, 'SALES'] = (
+        df_clean.loc[over_msrp_mask, 'QUANTITYORDERED'] *
+        df_clean.loc[over_msrp_mask, 'PRICEEACH']
+    ).round(2)
+
+EXPLANATION:
+    Since PRICEEACH was just changed, SALES must be recalculated for
+    those same rows to stay internally consistent.
+    Applies only to the 843 rows that were over MSRP.
+
+OUTPUT:
+    Fix 3 — Capped PRICEEACH to MSRP for 843 rows
+
+
+--------------------------------------------------------------------------------
+CELL 7847ba39 — FIX DATE DIMENSION COLUMNS
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean['ORDERDATE'] = pd.to_datetime(df_clean['ORDERDATE'])
+
+EXPLANATION:
+    Converts ORDERDATE from string to datetime so .dt accessor works.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean['MONTH_ID'] = df_clean['ORDERDATE'].dt.month
+    df_clean['QTR_ID']   = df_clean['ORDERDATE'].dt.quarter
+    df_clean['YEAR_ID']  = df_clean['ORDERDATE'].dt.year
+
+EXPLANATION:
+    Overwrites the stored date IDs with values extracted directly from
+    ORDERDATE — these are guaranteed to be mathematically correct.
+    .dt.month = calendar month (1–12)
+    .dt.quarter = quarter (1–4)
+    .dt.year = 4-digit year
+
+OUTPUT:
+    Fix 4 — Recomputed MONTH_ID, QTR_ID, YEAR_ID from ORDERDATE
+
+
+--------------------------------------------------------------------------------
+CELL 08282bfa — FIX TERRITORY INCONSISTENCY
+--------------------------------------------------------------------------------
+
+CODE:
+    territory_map = (
+        df_clean.groupby(['COUNTRY', 'TERRITORY']).size()
+        .reset_index(name='cnt')
+        .sort_values('cnt', ascending=False)
+        .drop_duplicates('COUNTRY')
+        .set_index('COUNTRY')['TERRITORY']
+    )
+
+EXPLANATION:
+    Step 1: .groupby(['COUNTRY','TERRITORY']).size() — counts rows per
+            country+territory combination.
+    Step 2: .reset_index(name='cnt') — flattens result to DataFrame.
+    Step 3: .sort_values('cnt', ascending=False) — puts the most common
+            territory assignment first for each country.
+    Step 4: .drop_duplicates('COUNTRY') — keeps only the first (most common)
+            territory per country, discarding minority assignments.
+    Step 5: .set_index('COUNTRY')['TERRITORY'] — converts to a Series
+            indexed by country name: {"Singapore": "Japan", "USA": "NA", ...}
+
+OUTPUT:
+    Prints the final country → territory mapping table.
+    Singapore maps to Japan (had 43 rows vs 36 for APAC).
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean['TERRITORY'] = df_clean['COUNTRY'].map(territory_map)
+
+EXPLANATION:
+    .map() replaces each value in COUNTRY with the corresponding territory
+    from territory_map. Every row gets the correct, standardised territory.
+
+OUTPUT:
+    Fix 5 — Standardised TERRITORY using majority country mapping
+
+
+--------------------------------------------------------------------------------
+CELL 2f978df8 — FILL MISSING VALUES
+--------------------------------------------------------------------------------
+
+CODE:
+    postal_missing = df_clean['POSTALCODE'].isnull().sum()
+    df_clean['POSTALCODE'] = df_clean['POSTALCODE'].fillna('UNKNOWN')
+
+EXPLANATION:
+    First line counts the nulls before filling (for the print message).
+    .fillna('UNKNOWN') replaces every NaN in POSTALCODE with the
+    string 'UNKNOWN' — makes the column fully populated.
+
+OUTPUT:
+    Fix 6 — Filled 76 missing POSTALCODE values with 'UNKNOWN'
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean['STATE'] = df_clean['STATE'].fillna('N/A')
+
+EXPLANATION:
+    Non-US countries (France, Germany, etc.) have no state equivalent.
+    Filling with 'N/A' signals "not applicable" rather than "missing".
+
+OUTPUT:
+    Fix 7 — Filled 1486 missing STATE values with 'N/A'
+
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean['ADDRESSLINE2'] = df_clean['ADDRESSLINE2'].fillna('')
+
+EXPLANATION:
+    ADDRESSLINE2 is an optional second address line (suite, floor, etc.).
+    Most addresses only have one line — filling with empty string ''
+    is cleaner than 'UNKNOWN' for an optional address field.
+
+OUTPUT:
+    Fix 8 — Filled 2521 missing ADDRESSLINE2 values with empty string
+
+
+--------------------------------------------------------------------------------
+CELL 61aec465 — REMOVE DUPLICATE ROWS
+--------------------------------------------------------------------------------
+
+CODE:
+    before = len(df_clean)
+    df_clean.drop_duplicates(inplace=True)
+    print(f"Fix 9 — Removed {before - len(df_clean)} fully duplicate rows")
+
+EXPLANATION:
+    before = row count before deduplication.
+    .drop_duplicates() removes rows that are identical across all columns.
+    before - len(df_clean) = number of rows removed (0 in this case).
+
+OUTPUT:
+    Fix 9 — Removed 0 fully duplicate rows
+
+
+--------------------------------------------------------------------------------
+CELL 502133eb — RECLASSIFY DEAL SIZE
+--------------------------------------------------------------------------------
+
+CODE:
+    def classify_deal(sales):
+        if sales < 3000:   return 'Small'
+        elif sales < 7000: return 'Medium'
+        else:              return 'Large'
+
+EXPLANATION:
+    Defines a function with clear business-rule thresholds:
+      SALES < $3,000  → Small
+      SALES $3K–$7K   → Medium
+      SALES >= $7,000 → Large
+    Used to ensure DEALSIZE is consistent with actual SALES values.
+
+OUTPUT:
+    Function defined. No printed output yet.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    before_deal = df_clean['DEALSIZE'].copy()
+    df_clean['DEALSIZE'] = df_clean['SALES'].apply(classify_deal)
+
+EXPLANATION:
+    before_deal saves the original DEALSIZE values for comparison.
+    .apply(classify_deal) runs the function on every value in the
+    SALES column and returns the new DEALSIZE label for each row.
+
+OUTPUT:
+    No printed output at this line.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    changed = (before_deal != df_clean['DEALSIZE']).sum()
+    print(df_clean['DEALSIZE'].value_counts().to_string())
+
+EXPLANATION:
+    != compares old vs new DEALSIZE row by row → True where they differ.
+    .sum() counts how many rows got a new classification.
+    .value_counts() counts how many rows fall into each deal size category.
+
+OUTPUT:
+    Fix 10 — Reclassified DEALSIZE for N rows based on SALES thresholds
+    Medium    XXXX
+    Small     XXXX
+    Large     XXXX
+
+
+--------------------------------------------------------------------------------
+CELL aeb28999 — POST-CLEANING VALIDATION
+--------------------------------------------------------------------------------
+
+CODE:
+    expected_final = (df_clean['QUANTITYORDERED'] * df_clean['PRICEEACH']).round(2)
+    sales_issues   = (df_clean['SALES'] - expected_final).abs() > 0.05
+    price_issues   = df_clean['PRICEEACH'] > df_clean['MSRP']
+    null_issues    = df_clean[['POSTALCODE','STATE','TERRITORY','ADDRESSLINE2']].isnull().sum().sum()
+    dupes_final    = df_clean.duplicated().sum()
+
+EXPLANATION:
+    Re-runs all the same checks from the analysis section on df_clean.
+    sales_issues   = count of SALES still not matching QTY × PRICE.
+    price_issues   = count of rows where price still exceeds MSRP.
+    null_issues    = total nulls remaining in the 4 key columns.
+    .sum().sum()   = first .sum() gives nulls per column, second sums those.
+    dupes_final    = number of duplicate rows remaining.
+
+OUTPUT:
+    =====================================================
+             POST-CLEANING VALIDATION
+    =====================================================
+      Remaining SALES mismatches              0
+      Remaining PRICEEACH > MSRP              0
+      Remaining nulls (key columns)           0
+      Remaining duplicate rows                0
+      Final row count                      2823
+    =====================================================
+    All checks passed!
+
+
+--------------------------------------------------------------------------------
+CELL bdfc8ce0 — SAVE CLEANED DATASET
+--------------------------------------------------------------------------------
+
+CODE:
+    df_clean.to_csv('sales_data_cleaned.csv', index=False)
+    print("Saved cleaned dataset to sales_data_cleaned.csv")
+
+EXPLANATION:
+    .to_csv() writes the DataFrame to a CSV file.
+    'sales_data_cleaned.csv' is the output filename (saved in same folder).
+    index=False prevents pandas from writing the row numbers (0,1,2,...)
+    as an extra column in the file.
+
+OUTPUT:
+    Saved cleaned dataset to sales_data_cleaned.csv
+    A new file 'sales_data_cleaned.csv' is created on disk.
+
+
+================================================================================
+UNIVARIATE ANALYSIS SECTION
+================================================================================
+
+
+--------------------------------------------------------------------------------
+CELL 3dfdc786 — SETUP IMPORTS
+--------------------------------------------------------------------------------
+
+CODE:
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as mticker
+    import seaborn as sns
+    import warnings
+    warnings.filterwarnings('ignore')
+
+EXPLANATION:
+    matplotlib.pyplot — core plotting library, used for figure creation.
+    matplotlib.ticker — used to format axis labels (e.g., $1.2M instead of 1200000).
+    seaborn — high-level plotting built on matplotlib, prettier defaults.
+    warnings.filterwarnings('ignore') — suppresses non-critical
+    deprecation warnings that clutter notebook output.
+
+OUTPUT:
+    No visible output. Libraries loaded into memory.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    sns.set_theme(style='whitegrid', palette='muted')
+    plt.rcParams['figure.dpi'] = 110
+    data = df_clean.copy()
+
+EXPLANATION:
+    sns.set_theme() sets global plot aesthetics:
+      style='whitegrid' = white background with horizontal grid lines.
+      palette='muted' = soft, professional colour scheme.
+    plt.rcParams['figure.dpi'] = 110 — sets resolution to 110 dots per inch
+    (sharper than default 72dpi).
+    data = df_clean.copy() — creates a working copy for analysis.
+
+OUTPUT:
+    No visible output. Global settings applied.
+
+
+--------------------------------------------------------------------------------
+CELL 32e05817 — DESCRIPTIVE STATISTICS (U1)
+--------------------------------------------------------------------------------
+
+CODE:
+    data[['QUANTITYORDERED','PRICEEACH','SALES','MSRP']].describe().round(2)
+
+EXPLANATION:
+    Selects 4 numerical columns.
+    .describe() computes: count, mean, std, min, 25%, 50%, 75%, max.
+    .round(2) rounds all values to 2 decimal places.
+
+OUTPUT:
+    A statistics table showing:
+    - count: 2823 rows for all columns (no nulls in numerical cols)
+    - mean SALES: ~$3,553
+    - mean QUANTITYORDERED: ~35 units
+    - mean PRICEEACH: ~$83
+    - max SALES: ~$14,082 (large bulk orders)
+
+
+--------------------------------------------------------------------------------
+CELL b82a0644 — HISTOGRAMS (U2)
+--------------------------------------------------------------------------------
+
+CODE:
+    fig, axes = plt.subplots(1, 3, figsize=(16, 4))
+
+EXPLANATION:
+    Creates a figure with 1 row and 3 subplot columns.
+    figsize=(16, 4) = 16 inches wide, 4 inches tall.
+    'axes' is an array of 3 Axes objects, one per chart.
+
+OUTPUT:
+    Empty figure canvas with 3 panels. Charts drawn in subsequent lines.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    for ax, col, color in zip(axes,
+                               ['SALES','QUANTITYORDERED','PRICEEACH'],
+                               ['steelblue','coral','seagreen']):
+
+EXPLANATION:
+    zip() pairs each element from 3 lists together:
+    axes[0] + 'SALES' + 'steelblue'
+    axes[1] + 'QUANTITYORDERED' + 'coral'
+    axes[2] + 'PRICEEACH' + 'seagreen'
+    Loop runs 3 times, one per chart.
+
+--------------------------------------------------------------------------------
+
+CODE:
+        sns.histplot(data[col], bins=30, kde=True, ax=ax, color=color)
+
+EXPLANATION:
+    Draws a histogram for the current column.
+    bins=30 = divide the range into 30 equal-width bars.
+    kde=True = overlay a smooth Kernel Density Estimate curve
+    showing the probability distribution shape.
+    ax=ax = draw on the current subplot panel.
+
+--------------------------------------------------------------------------------
+
+CODE:
+        ax.axvline(mean_val, color='red', linestyle='--', linewidth=1.2,
+                   label=f'Mean: {mean_val:.1f}')
+
+EXPLANATION:
+    axvline = draw a vertical line at x = mean_val.
+    color='red', linestyle='--' = red dashed line.
+    linewidth=1.2 = slightly thicker than default.
+    label= = text that appears in the legend.
+
+OUTPUT:
+    3 histograms side by side:
+    - SALES: right-skewed, most orders $2K–$5K, long tail to ~$14K
+    - QUANTITYORDERED: symmetric, centred ~35 units
+    - PRICEEACH: heavy spike at $100 (many items sold at full price)
+
+
+--------------------------------------------------------------------------------
+CELL edd739e0 — BOXPLOTS (U3)
+--------------------------------------------------------------------------------
+
+CODE:
+    sns.boxplot(y=data[col], ax=ax, color=color, width=0.4,
+                flierprops=dict(marker='o', markersize=3))
+
+EXPLANATION:
+    y= draws a vertical boxplot.
+    width=0.4 = narrower box (default is 0.8).
+    flierprops= controls outlier dot appearance:
+      marker='o' = circular dots
+      markersize=3 = small dots
+    The box represents IQR (25th to 75th percentile).
+    The line inside the box = median.
+    Whiskers extend to 1.5 × IQR.
+    Dots beyond whiskers = outliers.
+
+OUTPUT:
+    3 vertical boxplots:
+    - SALES: box from $2.2K to $4.5K, ~81 outlier dots above
+    - QUANTITYORDERED: box 27–43, 8 outliers above (60+ unit orders)
+    - PRICEEACH: box $69–$100, no outliers (bounded at $100)
+
+
+--------------------------------------------------------------------------------
+CELL 8b3edfd5 — ORDER STATUS (U4)
+--------------------------------------------------------------------------------
+
+CODE:
+    status_counts = data['STATUS'].value_counts()
+
+EXPLANATION:
+    .value_counts() counts occurrences of each unique STATUS value,
+    sorted from most to least frequent.
+
+OUTPUT:
+    Shipped       2617
+    Cancelled       60
+    On Hold         44
+    Disputed        23
+    Resolved        47
+    In Process      32
+
+--------------------------------------------------------------------------------
+
+CODE:
+    axes[0].pie(status_counts, labels=status_counts.index,
+                autopct='%1.1f%%', startangle=140, ...)
+
+EXPLANATION:
+    .pie() draws a pie/donut chart.
+    labels= = text label for each slice.
+    autopct='%1.1f%%' = auto-calculate and display percentage
+    with 1 decimal place on each slice.
+    startangle=140 = rotates chart so first slice starts at 140°
+    (better visual balance).
+
+--------------------------------------------------------------------------------
+
+CODE:
+    for bar in axes[1].patches:
+        axes[1].text(bar.get_x() + bar.get_width()/2,
+                     bar.get_height() + 5,
+                     int(bar.get_height()), ha='center', fontsize=9)
+
+EXPLANATION:
+    .patches = list of Rectangle objects (one per bar).
+    bar.get_x() + bar.get_width()/2 = horizontal centre of each bar.
+    bar.get_height() + 5 = just above the top of each bar.
+    int(bar.get_height()) = the count value to display.
+    ha='center' = centre-align the text.
+
+OUTPUT:
+    Pie chart: Shipped=92.7%, Cancelled=2.1%, etc.
+    Bar chart: count labels floating above each bar.
+
+
+--------------------------------------------------------------------------------
+CELL d2c2cd2e — PRODUCT LINE (U5)
+--------------------------------------------------------------------------------
+
+CODE:
+    pl_counts = data['PRODUCTLINE'].value_counts()
+    sns.barplot(x=pl_counts.values, y=pl_counts.index, palette='Blues_r', ax=axes[0])
+
+EXPLANATION:
+    Horizontal bar chart (x=values, y=labels).
+    palette='Blues_r' = reversed Blues palette — darkest bar = highest value.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    pl_sales = data.groupby('PRODUCTLINE')['SALES'].sum().sort_values(ascending=True)
+
+EXPLANATION:
+    Groups by product line, sums SALES for each.
+    sort_values(ascending=True) puts lowest at top — with horizontal bars,
+    this visually places highest at the bottom (reading order).
+
+--------------------------------------------------------------------------------
+
+CODE:
+    axes[1].xaxis.set_major_formatter(
+        mticker.FuncFormatter(lambda x, _: f'${x/1e6:.1f}M')
+    )
+
+EXPLANATION:
+    Customises x-axis tick labels using a function.
+    lambda x, _ : takes the raw number x (e.g. 3800000).
+    x/1e6 = divides by 1 million → 3.8
+    f'${...:.1f}M' = formats as "$3.8M"
+    _ ignores the 'pos' argument matplotlib always passes.
+
+OUTPUT:
+    Left chart: Classic Cars (858 orders), Vintage Cars (607), etc.
+    Right chart: Classic Cars leads at ~$3.9M revenue. Trains lowest.
+
+
+--------------------------------------------------------------------------------
+CELL 5ccd0fa0 — DEAL SIZE & COUNTRY (U6)
+--------------------------------------------------------------------------------
+
+CODE:
+    deal_order = ['Small', 'Medium', 'Large']
+    sns.countplot(data=data, x='DEALSIZE', order=deal_order, palette='Set2', ax=axes[0])
+
+EXPLANATION:
+    countplot automatically counts rows per category and draws bars.
+    order= forces a specific left-to-right display order.
+    palette='Set2' = a colourblind-friendly qualitative palette.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    top_countries = data['COUNTRY'].value_counts().head(10)
+
+EXPLANATION:
+    .value_counts() counts orders per country.
+    .head(10) keeps only the top 10 most frequent countries.
+
+OUTPUT:
+    Deal Size: Medium most common, then Small, then Large.
+    Countries: USA dominates (~1000+ orders), France 2nd, Spain 3rd.
+
+
+--------------------------------------------------------------------------------
+CELL fb656592 — TIME TRENDS (U7)
+--------------------------------------------------------------------------------
+
+CODE:
+    monthly = data.groupby('MONTH_ID')['SALES'].sum()
+
+EXPLANATION:
+    Groups all data by month number (1–12) across all years.
+    Sums SALES for each month — shows which calendar months are strongest.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    ax.set_xticks(range(1, 13))
+    ax.set_xticklabels(['Jan','Feb','Mar','Apr','May','Jun',
+                        'Jul','Aug','Sep','Oct','Nov','Dec'], rotation=45)
+
+EXPLANATION:
+    set_xticks() forces tick marks at positions 1 through 12.
+    set_xticklabels() replaces numeric labels with month abbreviations.
+    rotation=45 tilts labels 45° to prevent overlap.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    yearly = data.groupby('YEAR_ID')['SALES'].sum()
+    axes[1].bar(yearly.index.astype(str), yearly.values, ...)
+
+EXPLANATION:
+    Groups by year, sums sales.
+    .astype(str) converts year integers (2003, 2004, 2005) to strings
+    so they display as text labels, not a continuous numeric axis.
+
+OUTPUT:
+    Monthly chart: November is the clear peak every year.
+    Yearly chart: 2004 highest (~$4.7M), 2005 lowest (truncated at May).
+
+
+================================================================================
+BIVARIATE ANALYSIS SECTION
+================================================================================
+
+
+--------------------------------------------------------------------------------
+CELL ec7717d0 — CORRELATION HEATMAP (B1)
+--------------------------------------------------------------------------------
+
+CODE:
+    corr = data[['QUANTITYORDERED','PRICEEACH','SALES',
+                 'MSRP','ORDERLINENUMBER']].corr()
+
+EXPLANATION:
+    Selects 5 numerical columns.
+    .corr() computes the Pearson correlation coefficient between
+    every possible pair. Values range from -1 (perfect inverse) to
+    +1 (perfect positive relationship). 0 = no linear relationship.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm',
+                center=0, linewidths=0.5, annot_kws={'size': 10})
+
+EXPLANATION:
+    annot=True = print the correlation number inside each cell.
+    fmt='.2f' = display with 2 decimal places.
+    cmap='coolwarm' = blue (negative) → white (zero) → red (positive).
+    center=0 = white colour is anchored at 0 (no correlation).
+    linewidths=0.5 = thin lines between cells for clarity.
+    annot_kws={'size': 10} = font size of annotation numbers.
+
+OUTPUT:
+    Heatmap grid:
+    SALES–QUANTITYORDERED ≈ 0.55 (moderate positive)
+    SALES–PRICEEACH ≈ 0.60 (moderate positive)
+    MSRP–PRICEEACH ≈ near 0 (price set independently of MSRP after cleaning)
+    ORDERLINENUMBER has near-zero correlation with everything.
+
+
+--------------------------------------------------------------------------------
+CELL f74dfefe — SCATTER PLOTS (B2)
+--------------------------------------------------------------------------------
+
+CODE:
+    sns.scatterplot(data=data, x='QUANTITYORDERED', y='SALES',
+                    hue='PRODUCTLINE', alpha=0.5, ax=axes[0], s=30)
+
+EXPLANATION:
+    Plots each row as a dot at (QUANTITYORDERED, SALES).
+    hue='PRODUCTLINE' colours each dot by its product line.
+    alpha=0.5 = 50% transparency so overlapping dots remain visible.
+    s=30 = dot size (default is 72).
+
+--------------------------------------------------------------------------------
+
+CODE:
+    sns.scatterplot(..., hue='DEALSIZE', hue_order=['Small','Medium','Large'])
+
+EXPLANATION:
+    hue_order= controls the legend ordering and colour assignment.
+    Forces Small→Medium→Large order in legend.
+
+OUTPUT:
+    Left scatter: Clear upward trend — more QTY → higher SALES.
+    Right scatter: At PRICEEACH=$100 (most common), SALES splits into
+    3 horizontal bands = Small/Medium/Large driven purely by quantity.
+
+
+--------------------------------------------------------------------------------
+CELL 5893c856 — BOXPLOTS BY CATEGORY (B3)
+--------------------------------------------------------------------------------
+
+CODE:
+    sns.boxplot(data=data, x='PRODUCTLINE', y='SALES',
+                palette='Set2', ax=axes[0])
+
+EXPLANATION:
+    x='PRODUCTLINE' = one box per product line.
+    y='SALES' = the value being compared.
+    Shows the median, IQR, and outliers for SALES within each product line.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    axes[0].tick_params(axis='x', rotation=20)
+
+EXPLANATION:
+    Rotates x-axis labels by 20° to prevent product line names
+    from overlapping each other.
+
+OUTPUT:
+    Classic Cars has highest median SALES and widest spread.
+    Trains has the lowest and most consistent (narrow box) SALES.
+    Large deals have the highest SALES with widest variability.
+
+
+--------------------------------------------------------------------------------
+CELL 681adada — STACKED BAR: PRODUCT LINE vs DEAL SIZE (B4)
+--------------------------------------------------------------------------------
+
+CODE:
+    cross = pd.crosstab(data['PRODUCTLINE'], data['DEALSIZE'])[['Small','Medium','Large']]
+
+EXPLANATION:
+    pd.crosstab() creates a pivot table counting row combinations.
+    Rows = Product Lines, Columns = Deal Sizes, Values = count.
+    [['Small','Medium','Large']] reorders columns left to right.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    cross_pct = cross.div(cross.sum(axis=1), axis=0) * 100
+
+EXPLANATION:
+    cross.sum(axis=1) sums each row (total orders per product line).
+    .div(..., axis=0) divides each row by its row total.
+    * 100 converts to percentage scale (0–100).
+    Result: what % of each product line's orders are Small/Medium/Large.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    cross.plot(kind='bar', stacked=True, ax=axes[0],
+               color=['#a8d8ea','#aa96da','#fc5185'], edgecolor='white')
+
+EXPLANATION:
+    kind='bar' = vertical bar chart.
+    stacked=True = bars are stacked on top of each other
+    instead of side by side.
+    color= = hex colour codes for Small/Medium/Large segments.
+    edgecolor='white' = white border between segments for clarity.
+
+OUTPUT:
+    Left chart: raw counts stacked — Classic Cars tallest overall.
+    Right chart: % composition — Classic Cars has ~40% Large deals.
+    Trains and Ships are mostly Small/Medium.
+
+
+--------------------------------------------------------------------------------
+CELL c965b342 — MONTHLY TREND BY YEAR (B5)
+--------------------------------------------------------------------------------
+
+CODE:
+    monthly_year = data.groupby(['YEAR_ID','MONTH_ID'])['SALES'].sum().reset_index()
+
+EXPLANATION:
+    Groups by both year AND month together.
+    Creates a row for each year-month combination (e.g., 2003-Jan, 2003-Feb).
+    reset_index() converts the multi-index back to regular columns.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    for year, grp in monthly_year.groupby('YEAR_ID'):
+        ax.plot(grp['MONTH_ID'], grp['SALES'],
+                marker='o', linewidth=2, label=str(year))
+
+EXPLANATION:
+    Loops through each year group separately.
+    ax.plot() draws one line per year on the same chart.
+    marker='o' = circle dot at each data point.
+    linewidth=2 = slightly thick line.
+    label=str(year) = used in the legend (2003, 2004, 2005).
+    All 3 lines overlay on the same axes for direct comparison.
+
+OUTPUT:
+    3 overlapping lines — one per year.
+    All 3 spike at month 11 (November).
+    2005 line ends abruptly at month 5 (data ends in May 2005).
+
+
+--------------------------------------------------------------------------------
+CELL c1857547 — TOP CUSTOMERS (B6)
+--------------------------------------------------------------------------------
+
+CODE:
+    top_cust_sales  = data.groupby('CUSTOMERNAME')['SALES'].sum().nlargest(10)
+
+EXPLANATION:
+    Groups by customer name, sums their total revenue.
+    .nlargest(10) returns only the top 10 customers by revenue.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    top_cust_orders = data.groupby('CUSTOMERNAME').size().loc[top_cust_sales.index]
+
+EXPLANATION:
+    .size() counts order lines per customer.
+    .loc[top_cust_sales.index] filters to only the same 10 customers
+    identified by revenue — allows side-by-side comparison.
+
+OUTPUT:
+    Left chart: Euro Shopping Channel and Mini Gifts Distributors
+    have the highest total revenue (~$900K+ each).
+    Right chart: Those same customers also have the most order lines.
+
+
+--------------------------------------------------------------------------------
+CELL 00a1faf0 — SALES BY STATUS & TERRITORY (B7)
+--------------------------------------------------------------------------------
+
+CODE:
+    status_sales = data.groupby('STATUS')['SALES'].sum().sort_values(ascending=False)
+
+EXPLANATION:
+    Total revenue grouped by order status.
+    Sorted descending so the highest revenue status appears first.
+
+--------------------------------------------------------------------------------
+
+CODE:
+    for bar in axes[0].patches:
+        axes[0].text(..., f'${bar.get_height()/1e6:.2f}M', ...)
+
+EXPLANATION:
+    Loops through each bar, places a revenue label above it.
+    bar.get_height()/1e6 converts raw dollar amount to millions.
+    f'${...:.2f}M' formats as e.g. "$3.75M".
+
+OUTPUT:
+    Status chart: Shipped orders = ~$9M+ total; Cancelled/Disputed
+    orders still represent hundreds of thousands in lost revenue.
+    Territory chart: NA (North America) leads at ~$3.6M.
+    EMEA 2nd at ~$2.6M. Japan and APAC are significantly smaller.
+
+
+================================================================================
+INSIGHTS MARKDOWN CELL
+================================================================================
+
+This final cell is a markdown (text) cell — not executable code.
+It contains two summary tables and a recommendations section:
+
+1. UNIVARIATE INSIGHTS TABLE
+   Summarises key findings from charts U1–U7:
+   - SALES distribution is right-skewed
+   - PRICEEACH spikes at $100 (low discounting culture)
+   - 92% of orders are Shipped
+   - Classic Cars leads in revenue
+   - November is peak sales month every year
+
+2. BIVARIATE INSIGHTS TABLE
+   Summarises relationships found in charts B1–B7:
+   - SALES correlates strongly with QTY (0.55) and PRICE (0.60)
+   - Classic Cars has 40% Large deals
+   - All years show same November peak (seasonal pattern)
+   - Top 2 customers account for disproportionate revenue
+
+3. BUSINESS RECOMMENDATIONS
+   Five actionable items derived from the analysis:
+   1. Plan heavily for Q4 — Nov/Dec drives most revenue
+   2. Prioritise Classic Cars inventory and promotions
+   3. Expand EMEA market (multi-country volume)
+   4. Investigate Disputed/Cancelled orders for revenue recovery
+   5. Monitor top 10 customers for churn risk
+
+OUTPUT:
+    Rendered as a formatted table in Jupyter notebook.
+    No code executed — purely informational documentation.
+
+
+================================================================================
+END OF NOTEBOOK EXPLANATION
+================================================================================
